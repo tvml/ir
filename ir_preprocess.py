@@ -5,7 +5,7 @@ Created on Tue Nov  3 16:21:50 2020
 
 @author: giorgio
 """
-
+# %%
 import sys
 import re
 import copy
@@ -19,7 +19,7 @@ from nltk.corpus import stopwords
 
 import numpy as np
 
-
+# %%
 def preprocess_text(text, charmap):
     """Preprocess text by eliminating undesired chars"""
     t = ''
@@ -35,6 +35,7 @@ def preprocess_text(text, charmap):
     t = ' '.join([w.lower() for w in t.split() if len(w) > 1])
     return t
 
+# %%
 def words_from_text(text,
                     stop_words=set(stopwords.words('english')),
                     stemmer = PorterStemmer()):
@@ -46,6 +47,7 @@ def words_from_text(text,
     stemmed_set = set(stemmed)
     return stemmed, stemmed_set
 
+# %%
 def add_doc_to_indices(text, inv_ind, d1, key, charmap):
     t = preprocess_text(text, charmap)
     word_list, word_set = words_from_text(t)
@@ -71,11 +73,12 @@ def add_doc_to_indices(text, inv_ind, d1, key, charmap):
             ind[doc]['norm'] += ind[doc]['tf'][term]**2
         ind[doc]['norm'] = np.sqrt(ind[doc]['norm'])
 
-
+# %%
 file_dict = {"fw": 0, "rs": 12, "fr": 10, "ti": 11, "tt": 10, "wr": 10,
              "rk": 9, "ho": 19, "ai": 0, "qs": 24, "ak": 0, "ta": 0,
              "JRRTLetter": 354}
 
+# %%
 def build_indices(file_dict):
     with open('charmap.json') as f:
         charmap = json.load(f)
@@ -110,10 +113,12 @@ def build_indices(file_dict):
     return
 
 
-
+# %%
 def main():
     build_indices()
 
 
 if __name__ == "__main__":
     main()
+
+# %%
