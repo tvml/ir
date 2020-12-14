@@ -141,10 +141,25 @@ inv_index
 
 # for k, v in sorted_result.items():
 #     print('{}: {}'. format(titles[k], v))
+# %%
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+from plotnine import *
+from plotnine.data import *
+x=np.linspace(0,10,1000)
+#plt.plot(x, np.exp(x))
 
-
-
-
+# %%
+x = np.linspace(0,10,1000)
+d = {'x': x, 'exp': np.exp(x)}
+df = pd.DataFrame(data=d)
+(
+    ggplot(df, aes(x='x', y='exp'))
+    + geom_line(color='red',        # set line colour
+                  size=.3,   ) # line plot
+    + labs(x='$x$', y='$e^x$')
+)
 
 # len(scores['bofur'])
 
@@ -170,3 +185,5 @@ inv_index
 # lst_lines = text.splitlines( )
 # line = lst_lines[0]
 # g=re.match('\s*\w+\s*', line)
+
+# %%
