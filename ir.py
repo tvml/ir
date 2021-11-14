@@ -5,7 +5,14 @@
 #
 # @author: giorgio
 # """
+#%%
+import os
 
+abspath = os.path.abspath(__file__)
+dname = os.path.dirname(abspath)
+os.chdir(dname)
+
+#%%
 import sys
 import re
 import copy
@@ -16,8 +23,16 @@ import numpy as np
 
 from ir_preprocess import preprocess_text, words_from_text
 
-
+#%%
 def load_indices():
+    """
+        Load preprocessed collection data.
+        index: document-term index
+        inv_index: term_document index
+        titles: document keys to titles dictionary
+        charmap: character to character mapping table
+        n_docs: number of documents in collection
+    """
     with open('inv_index.json') as f:
         [n_docs, inv_index] = json.load(f)
     with open('index.json') as f:
@@ -28,16 +43,29 @@ def load_indices():
         charmap = json.load(f)
     return index, inv_index, titles, charmap, n_docs
 
-
-def query(q, index, inv_index, titles, n_docs, charmap):
+#%%
+#
+def query(q, index=index, inv_index=inv_index, n_docs=n_docs, charmap=charmap):
+    """
+        Return ranked list of (document key, score) in collection wrt the given query
+        q: query, as list of terms
+        index: document-term index
+        inv_index: term_document index
+        titles: document keys to titles dictionary
+        charmap: character to character mapping table
+        n_docs: number of documents in collection
+    """
     q_text = ' '.join(q)
     t = preprocess_text(q_text, charmap)
     query_terms_list, query_terms_set = words_from_text(t)
     all_scores = get_all_scores(query_terms_list, index, inv_index, n_docs)
-    sorted_list = get_sorted_result(all_scores)
-    output_result(sorted_list, titles)
+    sorted_list = get_sorted_result(all_scores)    
+    return sorted_list#output_result(sorted_list, titles)
 
-def output_result(results, titles):
+def output_result(results, titles=titles):
+    """
+        Prints a ranked list of (document title, score) from the given list of (document key, score)
+    """
     if len(results.keys()) == 0:
         print('No match')
     else:
@@ -65,21 +93,34 @@ def get_sorted_result(all_scores):
     return sorted_result
 
 
-def get_all_scores(query_terms_list, index, inv_index, n_docs):
+def get_all_scores(query_terms_list, index=index, inv_index=inv_index, n_docs=n_docs):
+    """
+        Computes the relevance score for each (query term, document) pair. 
+        Returns a dictionary, indexed by query terms of dictionaries, indexed by document
+        keys, of scores
+    """
     scores = {}
     for t in query_terms_list:
         scores[t] = doc_scores(t, index, inv_index, n_docs)
     return scores
 
-def doc_scores(t, index, inv_index, n_docs):
+def doc_scores(t, index=index, inv_index=inv_index, n_docs=n_docs):
+    """
+        For a given query term, computes its relevance score wrt all documents. 
+        Returns a dictionary, indexed by document keys, of scores
+    """
     term_scores = {}
     if inv_index.get(t):
         for doc in inv_index[t]['tf'].keys():
             term_scores[doc] = score(t, doc, index, inv_index, n_docs)
     return term_scores
 
-def score(t, key, index, inv_index, n_docs):
-     scr = tf(t,key, inv_index)*idf(t, inv_index, n_docs)/normalize(t, key, index)
+def score(t, key, index=index, inv_index=inv_index, n_docs=n_docs):
+    """
+        For a given pair (query term, document key), returns the corresponding
+        relevance score
+    """
+     scr = tf(t, key, inv_index)*idf(t, inv_index, n_docs)/normalize(t, key, index)
      return scr
 
 def tf(t, key, inv_index):
@@ -93,6 +134,10 @@ def idf(t, inv_index, n_docs):
 def normalize(t, key, index):
     return index[key]['norm']
 
+#%%
+sc=get_all_scores(['frodo','bilbo'],index, inv_index, n_docs)
+
+#%%
 
 def main():
     index, inv_index, titles, charmap, n_docs = load_indices()
@@ -101,13 +146,13 @@ def main():
 
     query(q, index, inv_index, titles, n_docs, charmap)
 
-
+#%%
 index, inv_index, titles, charmap, n_docs = load_indices()
 q = ['boromir', 'legolas']
 query(q, index, inv_index, titles, n_docs, charmap)
 
 
-
+#%%
 
 
 if __name__ == "__main__":
@@ -117,10 +162,10 @@ if __name__ == "__main__":
         q.append(arg)
     query(q[1:], index, inv_index, titles, n_docs, charmap)
 
-inv_index
+#inv_index
 
-
-# scores = query(q)
+#%%
+ scores = query(q, index, inv_index, titles, n_docs, charmap)
 
 # more_matches = 0
 # more_matches_term = None
